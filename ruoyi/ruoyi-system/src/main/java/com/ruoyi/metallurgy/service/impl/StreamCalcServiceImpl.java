@@ -27,6 +27,7 @@ import com.ruoyi.metallurgy.mapper.CalcRecordMapper;
 import com.ruoyi.metallurgy.mapper.StreamFlowMapper;
 import com.ruoyi.metallurgy.service.IProcessParamService;
 import com.ruoyi.metallurgy.service.IStreamCalcService;
+import com.ruoyi.metallurgy.support.RecordScope;
 
 /**
  * 铜闪速冶炼计算 服务层实现
@@ -95,6 +96,10 @@ public class StreamCalcServiceImpl implements IStreamCalcService
         {
             throw new ServiceException("计算记录不存在：" + calcId);
         }
+        if (!RecordScope.canView(record))
+        {
+            throw new ServiceException("没有权限查看计算记录 " + calcId);
+        }
         if (record.getResultSnapshot() == null || record.getResultSnapshot().isEmpty())
         {
             throw new ServiceException("该记录为配料计算记录，无全流程平衡结果，请先执行全流程计算");
@@ -120,6 +125,15 @@ public class StreamCalcServiceImpl implements IStreamCalcService
     @Override
     public List<StreamFlow> getStreamFlows(Long calcId)
     {
+        CalcRecord record = calcRecordMapper.selectCalcRecordById(calcId);
+        if (record == null)
+        {
+            throw new ServiceException("计算记录不存在：" + calcId);
+        }
+        if (!RecordScope.canView(record))
+        {
+            throw new ServiceException("没有权限查看计算记录 " + calcId);
+        }
         return streamFlowMapper.selectStreamFlowByCalcId(calcId);
     }
 

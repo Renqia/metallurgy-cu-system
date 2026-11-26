@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.metallurgy.domain.CalcRecord;
 import com.ruoyi.metallurgy.mapper.CalcRecordMapper;
 import com.ruoyi.metallurgy.mapper.StreamFlowMapper;
@@ -68,6 +69,10 @@ public class CalcRecordServiceImpl implements ICalcRecordService
     {
         for (Long id : ids)
         {
+            assertCanRemove(id);
+        }
+        for (Long id : ids)
+        {
             streamFlowMapper.deleteStreamFlowByCalcId(id);
         }
         return calcRecordMapper.deleteCalcRecordByIds(ids);
@@ -77,7 +82,20 @@ public class CalcRecordServiceImpl implements ICalcRecordService
     @Transactional
     public int deleteCalcRecordById(Long id)
     {
+        assertCanRemove(id);
         streamFlowMapper.deleteStreamFlowByCalcId(id);
         return calcRecordMapper.deleteCalcRecordById(id);
+    }
+
+    /**
+     * 删除前校验归属：记录不存在时放行（无副作用可删），存在但当前用户不可见则拒绝，避免越权删除他人记录
+     */
+    private void assertCanRemove(Long id)
+    {
+        CalcRecord record = calcRecordMapper.selectCalcRecordById(id);
+        if (record != null && !RecordScope.canView(record))
+        {
+            throw new ServiceException("没有权限删除计算记录 " + id);
+        }
     }
 }

@@ -41,13 +41,13 @@
 
 USE metallurgy_cu;
 
--- ========== 0. 执行前备份（可重复执行：每次覆盖上一次的备份） ==========
+-- ========== 0. 执行前备份（仅首次备份；重跑不覆盖，保留裁剪前原始状态以支持回滚） ==========
+-- 注意：改用 CREATE TABLE IF NOT EXISTS —— 备份表已存在时跳过，保证"第一次执行前"的菜单快照被保留。
+--       若本库此前已用旧版脚本执行过（其备份曾每次覆盖），当前 sys_menu_bak_v2 可能已是裁剪后状态，
+--       回滚前务必先核对备份内容是否为裁剪前菜单，不可盲目执行第 5 节回滚。
 
-DROP TABLE IF EXISTS sys_menu_bak_v2;
-CREATE TABLE sys_menu_bak_v2 AS SELECT * FROM sys_menu;
-
-DROP TABLE IF EXISTS sys_role_menu_bak_v2;
-CREATE TABLE sys_role_menu_bak_v2 AS SELECT * FROM sys_role_menu;
+CREATE TABLE IF NOT EXISTS sys_menu_bak_v2 AS SELECT * FROM sys_menu;
+CREATE TABLE IF NOT EXISTS sys_role_menu_bak_v2 AS SELECT * FROM sys_role_menu;
 
 -- 收集"待删菜单 + 其全部后代"（递归，覆盖任意层级），供后续按集合删除
 DROP TEMPORARY TABLE IF EXISTS tmp_menu_to_delete;
