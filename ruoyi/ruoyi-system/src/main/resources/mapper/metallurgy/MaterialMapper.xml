@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.metallurgy.mapper.MaterialMapper">
+
+    <resultMap type="Material" id="MaterialResult">
+        <result property="id"            column="id"            />
+        <result property="materialName"  column="material_name" />
+        <result property="materialType"  column="material_type" />
+        <result property="cuContent"     column="cu_content"    />
+        <result property="feContent"     column="fe_content"    />
+        <result property="sulfurContent"      column="s_content"     />
+        <result property="sio2Content"   column="sio2_content"  />
+        <result property="caoContent"    column="cao_content"   />
+        <result property="unitPrice"     column="unit_price"    />
+        <result property="stockQty"      column="stock_qty"     />
+        <result property="source"        column="source"        />
+        <result property="remark"        column="remark"        />
+        <result property="createBy"      column="create_by"     />
+        <result property="createTime"    column="create_time"   />
+        <result property="updateBy"      column="update_by"     />
+        <result property="updateTime"    column="update_time"   />
+    </resultMap>
+
+    <sql id="selectMaterialVo">
+        select id, material_name, material_type, cu_content, fe_content, s_content, sio2_content,
+               cao_content, unit_price, stock_qty, source, remark, create_by, create_time, update_by, update_time
+        from t_material
+    </sql>
+
+    <select id="selectMaterialList" parameterType="Material" resultMap="MaterialResult">
+        <include refid="selectMaterialVo"/>
+        <where>
+            <if test="materialName != null and materialName != ''">
+                and material_name like concat('%', #{materialName}, '%')
+            </if>
+            <if test="materialType != null and materialType != ''">
+                and material_type = #{materialType}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="countMaterial" parameterType="Material" resultType="long">
+        select count(1) from t_material
+        <where>
+            <if test="materialName != null and materialName != ''">
+                and material_name like concat('%', #{materialName}, '%')
+            </if>
+            <if test="materialType != null and materialType != ''">
+                and material_type = #{materialType}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMaterialById" parameterType="Long" resultMap="MaterialResult">
+        <include refid="selectMaterialVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectMaterialByIds" parameterType="java.util.List" resultMap="MaterialResult">
+        <include refid="selectMaterialVo"/>
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        order by id
+    </select>
+
+    <insert id="insertMaterial" parameterType="Material" useGeneratedKeys="true" keyProperty="id">
+        insert into t_material
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="materialName != null and materialName != ''">material_name,</if>
+            <if test="materialType != null and materialType != ''">material_type,</if>
+            <if test="cuContent != null">cu_content,</if>
+            <if test="feContent != null">fe_content,</if>
+            <if test="sulfurContent != null">s_content,</if>
+            <if test="sio2Content != null">sio2_content,</if>
+            <if test="caoContent != null">cao_content,</if>
+            <if test="unitPrice != null">unit_price,</if>
+            <if test="stockQty != null">stock_qty,</if>
+            <if test="source != null">source,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="materialName != null and materialName != ''">#{materialName},</if>
+            <if test="materialType != null and materialType != ''">#{materialType},</if>
+            <if test="cuContent != null">#{cuContent},</if>
+            <if test="feContent != null">#{feContent},</if>
+            <if test="sulfurContent != null">#{sulfurContent},</if>
+            <if test="sio2Content != null">#{sio2Content},</if>
+            <if test="caoContent != null">#{caoContent},</if>
+            <if test="unitPrice != null">#{unitPrice},</if>
+            <if test="stockQty != null">#{stockQty},</if>
+            <if test="source != null">#{source},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateMaterial" parameterType="Material">
+        update t_material
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="materialName != null and materialName != ''">material_name = #{materialName},</if>
+            <if test="materialType != null and materialType != ''">material_type = #{materialType},</if>
+            <if test="cuContent != null">cu_content = #{cuContent},</if>
+            <if test="feContent != null">fe_content = #{feContent},</if>
+            <if test="sulfurContent != null">s_content = #{sulfurContent},</if>
+            <if test="sio2Content != null">sio2_content = #{sio2Content},</if>
+            <if test="caoContent != null">cao_content = #{caoContent},</if>
+            <if test="unitPrice != null">unit_price = #{unitPrice},</if>
+            <if test="stockQty != null">stock_qty = #{stockQty},</if>
+            <if test="source != null">source = #{source},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMaterialById" parameterType="Long">
+        delete from t_material where id = #{id}
+    </delete>
+
+    <delete id="deleteMaterialByIds" parameterType="String">
+        delete from t_material where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

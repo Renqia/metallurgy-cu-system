@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.metallurgy.mapper.StreamFlowMapper">
+
+    <resultMap type="StreamFlow" id="StreamFlowResult">
+        <result property="id"            column="id"            />
+        <result property="calcId"        column="calc_id"       />
+        <result property="nodeName"      column="node_name"     />
+        <result property="flowType"      column="flow_type"     />
+        <result property="materialName"  column="material_name" />
+        <result property="element"       column="element"       />
+        <result property="flowValue"     column="flow_value"    />
+        <result property="unit"          column="unit"          />
+        <result property="createTime"    column="create_time"   />
+    </resultMap>
+
+    <select id="selectStreamFlowByCalcId" parameterType="Long" resultMap="StreamFlowResult">
+        select id, calc_id, node_name, flow_type, material_name, element, flow_value, unit, create_time
+        from t_stream_flow
+        where calc_id = #{calcId}
+        order by id
+    </select>
+
+    <insert id="batchInsertStreamFlow">
+        insert into t_stream_flow (calc_id, node_name, flow_type, material_name, element, flow_value, unit, create_time)
+        values
+        <foreach item="item" collection="list" separator=",">
+            (#{item.calcId}, #{item.nodeName}, #{item.flowType}, #{item.materialName},
+             #{item.element}, #{item.flowValue}, #{item.unit}, sysdate())
+        </foreach>
+    </insert>
+
+    <delete id="deleteStreamFlowByCalcId" parameterType="Long">
+        delete from t_stream_flow where calc_id = #{calcId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.metallurgy.mapper.CalcRecordMapper">
+
+    <resultMap type="CalcRecord" id="CalcRecordResult">
+        <result property="id"              column="id"               />
+        <result property="planId"          column="plan_id"          />
+        <result property="planName"        column="plan_name"        />
+        <result property="calcType"        column="calc_type"        />
+        <result property="inputSnapshot"   column="input_snapshot"   />
+        <result property="resultSnapshot"  column="result_snapshot"  />
+        <result property="mixedCu"         column="mixed_cu"         />
+        <result property="matteGradeCalc"  column="matte_grade_calc" />
+        <result property="slagFeSio2"      column="slag_fe_sio2"     />
+        <result property="directYield"     column="direct_yield"     />
+        <result property="calcTime"        column="calc_time"        />
+        <result property="createBy"        column="create_by"        />
+        <result property="remark"          column="remark"           />
+    </resultMap>
+
+    <!-- 列表查询不返回快照大字段，避免列表接口传输过多数据 -->
+    <sql id="selectCalcRecordVo">
+        select id, plan_id, plan_name, calc_type, mixed_cu, matte_grade_calc, slag_fe_sio2,
+               direct_yield, calc_time, create_by, remark
+        from t_calc_record
+    </sql>
+
+    <select id="selectCalcRecordList" parameterType="CalcRecord" resultMap="CalcRecordResult">
+        <include refid="selectCalcRecordVo"/>
+        <where>
+            <if test="planName != null and planName != ''">
+                and plan_name like concat('%', #{planName}, '%')
+            </if>
+            <if test="calcType != null and calcType != ''">
+                and calc_type = #{calcType}
+            </if>
+            <!-- 归属过滤：非超级管理员仅查询本人创建的记录（由 RecordScope 写入 createBy 条件） -->
+            <if test="createBy != null and createBy != ''">
+                and create_by = #{createBy}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="countCalcRecord" parameterType="CalcRecord" resultType="long">
+        select count(1) from t_calc_record
+        <where>
+            <if test="planName != null and planName != ''">
+                and plan_name like concat('%', #{planName}, '%')
+            </if>
+            <if test="calcType != null and calcType != ''">
+                and calc_type = #{calcType}
+            </if>
+            <if test="createBy != null and createBy != ''">
+                and create_by = #{createBy}
+            </if>
+        </where>
+    </select>
+
+    <!-- 首页概览用：由数据库层 LIMIT 取最近 N 条，避免全量查询后在内存截断 -->
+    <select id="selectCalcRecordTop" resultMap="CalcRecordResult">
+        select id, plan_id, plan_name, calc_type, mixed_cu, matte_grade_calc, slag_fe_sio2,
+               direct_yield, calc_time, create_by, remark
+        from t_calc_record
+        <where>
+            <if test="calcType != null and calcType != ''">
+                and calc_type = #{calcType}
+            </if>
+            <if test="createBy != null and createBy != ''">
+                and create_by = #{createBy}
+            </if>
+        </where>
+        order by id desc
+        limit #{limit}
+    </select>
+
+    <select id="selectCalcRecordById" parameterType="Long" resultMap="CalcRecordResult">
+        select id, plan_id, plan_name, calc_type, input_snapshot, result_snapshot, mixed_cu,
+               matte_grade_calc, slag_fe_sio2, direct_yield, calc_time, create_by, remark
+        from t_calc_record
+        where id = #{id}
+    </select>
+
+    <insert id="insertCalcRecord" parameterType="CalcRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into t_calc_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="planId != null">plan_id,</if>
+            <if test="planName != null">plan_name,</if>
+            <if test="calcType != null and calcType != ''">calc_type,</if>
+            <if test="inputSnapshot != null">input_snapshot,</if>
+            <if test="resultSnapshot != null">result_snapshot,</if>
+            <if test="mixedCu != null">mixed_cu,</if>
+            <if test="matteGradeCalc != null">matte_grade_calc,</if>
+            <if test="slagFeSio2 != null">slag_fe_sio2,</if>
+            <if test="directYield != null">direct_yield,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            calc_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="planId != null">#{planId},</if>
+            <if test="planName != null">#{planName},</if>
+            <if test="calcType != null and calcType != ''">#{calcType},</if>
+            <if test="inputSnapshot != null">#{inputSnapshot},</if>
+            <if test="resultSnapshot != null">#{resultSnapshot},</if>
+            <if test="mixedCu != null">#{mixedCu},</if>
+            <if test="matteGradeCalc != null">#{matteGradeCalc},</if>
+            <if test="slagFeSio2 != null">#{slagFeSio2},</if>
+            <if test="directYield != null">#{directYield},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <delete id="deleteCalcRecordById" parameterType="Long">
+        delete from t_calc_record where id = #{id}
+    </delete>
+
+    <delete id="deleteCalcRecordByIds" parameterType="String">
+        delete from t_calc_record where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

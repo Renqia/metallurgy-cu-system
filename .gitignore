@@ -1,0 +1,22 @@
+# 依赖
+node_modules/
+
+# 构建产物
+target/
+dist/
+.vite/
+*.class
+
+# 日志
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# 系统/临时文件
+*.tmp
+*.bak
+~$*
+Thumbs.db
+.DS_Store
